@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.*;
 
 public class Main {
-    private static final int    AMOUNT_TO_GENERATE = 1000;
+    private static final int    AMOUNT_TO_GENERATE = 150;
     private static final String RECOLORABLE_INDICATOR = "c_";
 
     private static final File RES_DIR         = Paths.get("src", "main", "resources").toFile();
@@ -71,10 +71,13 @@ public class Main {
         for(Map.Entry<String, List<Trait>> entry : traits.entrySet()) {
             final List<Trait> value = entry.getValue();
 
-            int selection = RANDOM.nextInt(value.size() + 1);
-
-            if(selection < value.size()) { // This provides the option that no trait will be added
+            if(value.size() > 1 && RANDOM.nextBoolean()) {
                 attributes.add(value.get(RANDOM.nextInt(value.size())));
+            } else {
+                int selection = RANDOM.nextInt(value.size() + 1);
+                if(selection < value.size()) { // This provides the option that no trait will be added
+                    attributes.add(value.get(RANDOM.nextInt(value.size())));
+                }
             }
         }
 
