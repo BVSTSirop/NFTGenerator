@@ -39,6 +39,9 @@ public class Main {
     private static final String IMG_FILE_EXT  = ".png";
     private static final String JSON_FILE_EXT = ".json";
 
+    private static final String AVATAR_NAME   = "Crested Gecko";
+    private static final String AVATAR_DESC   = "A procedurally generated crested gecko";
+
 
     private static List<Color> materialColors;
     private static int         avatarId = 0;
@@ -77,7 +80,7 @@ public class Main {
 
         avatarId++;
 
-        return new Avatar(avatarId, materialColors.get(RANDOM.nextInt(materialColors.size())), attributes);
+        return new Avatar(avatarId, AVATAR_NAME, AVATAR_DESC, materialColors.get(RANDOM.nextInt(materialColors.size())), attributes);
     }
 
     private static List<Color> readColorsFile(final File f) {

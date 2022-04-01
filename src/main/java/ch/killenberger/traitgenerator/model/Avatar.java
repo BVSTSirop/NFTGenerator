@@ -18,7 +18,7 @@ public class Avatar {
     private String name;
 
     @Expose
-    private String description = "Procedurally generated Crested Gecko";
+    private String description;
 
     @Expose
     private Long date;
@@ -31,9 +31,10 @@ public class Avatar {
 
     private Gson gson;
 
-    public Avatar(final int id, final Color backgroundColor, final List<Trait> attributes) {
+    public Avatar(final int id, final String name, final String description, final Color backgroundColor, final List<Trait> attributes) {
         this.id              = id;
-        this.name            = "Crested Gecko #" + id;
+        this.name            = name + "#" + id;
+        this.description     = description;
         this.date            = new Timestamp(System.currentTimeMillis()).getTime();
         this.backgroundColor = backgroundColor;
 
