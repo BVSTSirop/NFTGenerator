@@ -8,7 +8,6 @@ import com.google.gson.annotations.Expose;
 import java.awt.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Avatar {
@@ -33,7 +32,7 @@ public class Avatar {
 
     public Avatar(final int id, final String name, final String description, final Color backgroundColor, final List<Trait> attributes) {
         this.id              = id;
-        this.name            = name + "#" + id;
+        this.name            = name + " #" + id;
         this.description     = description;
         this.date            = new Timestamp(System.currentTimeMillis()).getTime();
         this.backgroundColor = backgroundColor;
