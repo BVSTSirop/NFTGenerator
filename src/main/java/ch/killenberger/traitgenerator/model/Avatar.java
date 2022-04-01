@@ -13,24 +13,17 @@ public class Avatar {
     private int id;
 
     @Expose
-    private List<Trait> bodyCharacteristics = new ArrayList<>();
-
-    @Expose
-    private List<Trait> traits = new ArrayList<>();
+    private List<Trait> attributes = new ArrayList<>();
 
     @Expose
     private Color backgroundColor;
 
-    public Avatar(final int id, final Color backgroundColor, final List<Trait> bodyCharacteristics, final List<Trait> traits) {
+    public Avatar(final int id, final Color backgroundColor, final List<Trait> attributes) {
         this.id              = id;
         this.backgroundColor = backgroundColor;
 
-        if(bodyCharacteristics != null) {
-            this.bodyCharacteristics.addAll(bodyCharacteristics);
-        }
-
-        if(traits != null) {
-            this.traits.addAll(traits);
+        if(attributes != null) {
+            this.attributes.addAll(attributes);
         }
     }
 
@@ -50,20 +43,12 @@ public class Avatar {
         this.backgroundColor = backgroundColor;
     }
 
-    public List<Trait> getBodyCharacteristics() {
-        return bodyCharacteristics;
+    public List<Trait> getAttributes() {
+        return attributes;
     }
 
-    public void setBodyCharacteristics(List<Trait> bodyCharacteristics) {
-        this.bodyCharacteristics = bodyCharacteristics;
-    }
-
-    public List<Trait> getTraits() {
-        return traits;
-    }
-
-    public void setTraits(List<Trait> traits) {
-        this.traits = traits;
+    public void setAttributes(List<Trait> attributes) {
+        this.attributes = attributes;
     }
 
     public String getAvatarPropertiesAsJSON() {
@@ -71,13 +56,5 @@ public class Avatar {
         gsonBuilder.registerTypeAdapter(Color.class, new ColorSerializer());
 
         return gsonBuilder.create().toJson(this);
-    }
-
-    @Override
-    public String toString() {
-        return "Avatar{" +
-                "bodyCharacteristics=" + bodyCharacteristics +
-                ", traits=" + traits +
-                '}';
     }
 }

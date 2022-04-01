@@ -5,36 +5,35 @@ import ch.killenberger.traitgenerator.model.Trait;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 
 public abstract class ImageUtil {
-    private static final Random RANDOM     = new Random();
+    private static final Random RANDOM = new Random();
 
-    private ImageUtil() { }
+    private ImageUtil() {
+    }
 
     public static void drawAvatar(final Avatar avatar, final File f) throws IOException {
-        final List<Trait> bodyCharacteristics = avatar.getBodyCharacteristics();
-        final List<Trait> traits              = avatar.getTraits();
+        final List<Trait> attributes = avatar.getAttributes();
 
-        final BufferedImage firstTrait = bodyCharacteristics.stream().findFirst().get().getImage();
-        final BufferedImage combined   = new BufferedImage(firstTrait.getWidth(), firstTrait.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        final Graphics      graphics   = combined.getGraphics();
+        final BufferedImage firstTrait = attributes.stream().findFirst().get().getImage();
+        final BufferedImage combined = new BufferedImage(firstTrait.getWidth(), firstTrait.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        final Graphics graphics = combined.getGraphics();
 
         graphics.setColor(avatar.getBackgroundColor());
-        graphics.fillRect (0, 0, firstTrait.getWidth(), firstTrait.getHeight());
+        graphics.fillRect(0, 0, firstTrait.getWidth(), firstTrait.getHeight());
 
-        drawTraits(bodyCharacteristics, graphics);
-        drawTraits(traits, graphics);
+        drawTraits(attributes, graphics);
 
         graphics.dispose();
 
         final File parent = f.getParentFile();
-        if(!parent.exists()) {
+        if (!parent.exists()) {
             parent.mkdir();
         }
 
@@ -43,10 +42,10 @@ public abstract class ImageUtil {
 
     public static void drawTraits(List<Trait> traits, Graphics g) {
         BufferedImage recoloredImage;
-        for(Trait characteristic : traits) {
+        for (Trait characteristic : traits) {
             final BufferedImage original = characteristic.getImage();
 
-            if(characteristic.isRecolorable()) {
+            if (characteristic.isRecolorable()) {
                 recoloredImage = recolorBufferedImageRandomly(original);
                 recoloredImage.getGraphics().drawImage(original, 0, 0, null);
 
@@ -66,18 +65,20 @@ public abstract class ImageUtil {
     }
 
     public static BufferedImage recolorBufferedImageRandomly(final BufferedImage bImage) {
-        final int r = getRandomRGBInteger();
-        final int g = getRandomRGBInteger();
-        final int b = getRandomRGBInteger();
-
-        return recolorBufferedImage(bImage, r, g, b);
+        return recolorBufferedImage(bImage, getRandomColor());
     }
 
-    public static BufferedImage recolorBufferedImage(final BufferedImage bImage, final int r, final int g, final int b) {
-        final IndexColorModel colorModel = createCustomColorModel(r, g, b);
-        final Raster          raster     = colorModel.createCompatibleWritableRaster(bImage.getWidth(), bImage.getHeight());
+    public static BufferedImage recolorBufferedImage(final BufferedImage bImage, final Color color) {
+        for (int x = 0; x < bImage.getWidth(); x++) {
+            for (int y = 0; y < bImage.getHeight(); y++) {
+                int pixel = bImage.getRGB(x, y);
 
-        return new BufferedImage((ColorModel) colorModel, (WritableRaster) raster, false, null);
+                if ((pixel & 0x00FFFFFF) != 0 && (pixel >> 24) != 0x00) {
+                    bImage.setRGB(x, y, (color.getRGB()));
+                }
+            }
+        }
+        return bImage;
     }
 
     private static IndexColorModel createCustomColorModel(final int rValue, final int gValue, final int bValue) {

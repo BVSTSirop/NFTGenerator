@@ -11,7 +11,6 @@ import org.json.simple.parser.ParseException;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.font.ImageGraphicAttribute;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
@@ -58,27 +57,26 @@ public class Main {
     }
 
     private static Avatar createAvatar(final Map<String, List<Trait>> bodyParts, final Map<String, List<Trait>> traits) {
-        final List<Trait> avatarBodyCharacteristics = new ArrayList<>();
+        final List<Trait> attributes = new ArrayList<>();
         for(Map.Entry<String, List<Trait>> entry : bodyParts.entrySet()) {
             final List<Trait> value = entry.getValue();
 
-            avatarBodyCharacteristics.add(value.get(RANDOM.nextInt(value.size())));
+            attributes.add(value.get(RANDOM.nextInt(value.size())));
         }
 
-        final List<Trait> avatarTraits = new ArrayList<>();
         for(Map.Entry<String, List<Trait>> entry : traits.entrySet()) {
             final List<Trait> value = entry.getValue();
 
             int selection = RANDOM.nextInt(value.size() + 1);
 
             if(selection < value.size()) { // This provides the option that no trait will be added
-                avatarTraits.add(value.get(RANDOM.nextInt(value.size())));
+                attributes.add(value.get(RANDOM.nextInt(value.size())));
             }
         }
 
         avatarId++;
 
-        return new Avatar(avatarId, materialColors.get(RANDOM.nextInt(materialColors.size())), avatarBodyCharacteristics, avatarTraits);
+        return new Avatar(avatarId, materialColors.get(RANDOM.nextInt(materialColors.size())), attributes);
     }
 
     private static List<Color> readColorsFile(final File f) {
@@ -154,7 +152,7 @@ public class Main {
                     return;
                 }
 
-                traits.get(parentDir).add(new Trait(name, image, recolorable));
+                traits.get(parentDir).add(new Trait(parentDir, name, image, recolorable));
             }
         });
 
