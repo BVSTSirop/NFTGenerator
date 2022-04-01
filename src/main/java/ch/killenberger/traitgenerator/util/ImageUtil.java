@@ -65,16 +65,20 @@ public abstract class ImageUtil {
     }
 
     public static BufferedImage recolorBufferedImageRandomly(final BufferedImage bImage) {
-        return recolorBufferedImage(bImage, getRandomColor());
+        final int r = getRandomRGBInteger();
+        final int g = getRandomRGBInteger();
+        final int b = getRandomRGBInteger();
+
+        return recolorBufferedImage(bImage, r, g, b);
     }
 
-    public static BufferedImage recolorBufferedImage(final BufferedImage bImage, final Color color) {
+    public static BufferedImage recolorBufferedImage(final BufferedImage bImage, final int r, final int g, final int b) {
         for (int x = 0; x < bImage.getWidth(); x++) {
             for (int y = 0; y < bImage.getHeight(); y++) {
-                int pixel = bImage.getRGB(x, y);
+                final Color pixelColor = new Color(bImage.getRGB(x, y), true);
 
-                if ((pixel & 0x00FFFFFF) != 0 && (pixel >> 24) != 0x00) {
-                    bImage.setRGB(x, y, (color.getRGB()));
+                if ((pixelColor.getRGB() & 0x00FFFFFF) != 0 && (pixelColor.getRGB() >> 24) != 0x00) {
+                    bImage.setRGB(x, y, new Color(r, g, b, pixelColor.getAlpha()).getRGB());
                 }
             }
         }

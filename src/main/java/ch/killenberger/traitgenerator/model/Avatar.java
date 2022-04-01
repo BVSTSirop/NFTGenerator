@@ -1,6 +1,7 @@
 package ch.killenberger.traitgenerator.model;
 
 import ch.killenberger.traitgenerator.gson.ColorSerializer;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
@@ -18,6 +19,8 @@ public class Avatar {
     @Expose
     private Color backgroundColor;
 
+    private Gson gson;
+
     public Avatar(final int id, final Color backgroundColor, final List<Trait> attributes) {
         this.id              = id;
         this.backgroundColor = backgroundColor;
@@ -25,6 +28,10 @@ public class Avatar {
         if(attributes != null) {
             this.attributes.addAll(attributes);
         }
+
+        final GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation();
+        gsonBuilder.registerTypeAdapter(Color.class, new ColorSerializer());
+        this.gson = gsonBuilder.create();
     }
 
     public int getId() {
@@ -52,9 +59,6 @@ public class Avatar {
     }
 
     public String getAvatarPropertiesAsJSON() {
-        final GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation();
-        gsonBuilder.registerTypeAdapter(Color.class, new ColorSerializer());
-
-        return gsonBuilder.create().toJson(this);
+        return gson.toJson(this);
     }
 }

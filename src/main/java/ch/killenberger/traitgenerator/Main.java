@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.*;
 
 public class Main {
+    private static final int    AMOUNT_TO_GENERATE = 1000;
     private static final String RECOLORABLE_INDICATOR = "c_";
 
     private static final File RES_DIR         = Paths.get("src", "main", "resources").toFile();
@@ -49,7 +50,7 @@ public class Main {
         materialColors = readColorsFile(COLORS_FILE);
 
         Avatar avatar;
-        for(int i = 0; i <= 10; i++) {
+        for(int i = 0; i < AMOUNT_TO_GENERATE; i++) {
             avatar = createAvatar(bodyParts, traits);
             ImageUtil.drawAvatar(avatar, new File(IMG_OUTPUT_DIR, avatar.getId() + IMG_FILE_EXT));
             FileUtil.writeToFile(new File(JSON_OUTPUT_DIR, avatar.getId() + JSON_FILE_EXT), avatar.getAvatarPropertiesAsJSON());
