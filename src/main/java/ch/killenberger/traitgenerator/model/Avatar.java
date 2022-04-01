@@ -6,12 +6,22 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
 import java.awt.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Avatar {
-    @Expose
     private int id;
+
+    @Expose
+    private String name;
+
+    @Expose
+    private String description = "Procedurally generated Crested Gecko";
+
+    @Expose
+    private Long date;
 
     @Expose
     private List<Trait> attributes = new ArrayList<>();
@@ -23,6 +33,8 @@ public class Avatar {
 
     public Avatar(final int id, final Color backgroundColor, final List<Trait> attributes) {
         this.id              = id;
+        this.name            = "Crested Gecko #" + id;
+        this.date            = new Timestamp(System.currentTimeMillis()).getTime();
         this.backgroundColor = backgroundColor;
 
         if(attributes != null) {
@@ -40,6 +52,30 @@ public class Avatar {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getDate() {
+        return date;
+    }
+
+    public void setDate(Long date) {
+        this.date = date;
     }
 
     public Color getBackgroundColor() {
