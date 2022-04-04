@@ -6,7 +6,8 @@ import ch.killenberger.traitgenerator.model.Trait;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -19,11 +20,10 @@ public abstract class ImageUtil {
     }
 
     public static void drawAvatar(final Avatar avatar, final File f) throws IOException {
-        final List<Trait> attributes = avatar.getAttributes();
-
+        final List<Trait>   attributes = avatar.getAttributes();
         final BufferedImage firstTrait = attributes.stream().findFirst().get().getImage();
-        final BufferedImage combined = new BufferedImage(firstTrait.getWidth(), firstTrait.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        final Graphics graphics = combined.getGraphics();
+        final BufferedImage combined   = new BufferedImage(firstTrait.getWidth(), firstTrait.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        final Graphics      graphics   = combined.getGraphics();
 
         graphics.setColor(avatar.getBackgroundColor());
         graphics.fillRect(0, 0, firstTrait.getWidth(), firstTrait.getHeight());
@@ -41,27 +41,18 @@ public abstract class ImageUtil {
     }
 
     public static void drawTraits(List<Trait> traits, Graphics g) {
-        BufferedImage recoloredImage;
+        BufferedImage recoloredCharacteristic;
         for (Trait characteristic : traits) {
             final BufferedImage original = characteristic.getImage();
 
             if (characteristic.isRecolorable()) {
-                recoloredImage = recolorBufferedImageRandomly(original);
-                recoloredImage.getGraphics().drawImage(original, 0, 0, null);
+                recoloredCharacteristic = recolorBufferedImageRandomly(original);
 
-                g.drawImage(recoloredImage, 0, 0, null);
+                g.drawImage(recoloredCharacteristic, 0, 0, null);
             } else {
                 g.drawImage(original, 0, 0, null);
             }
         }
-    }
-
-    public static Color getRandomColor() {
-        final int r = getRandomRGBInteger();
-        final int g = getRandomRGBInteger();
-        final int b = getRandomRGBInteger();
-
-        return new Color(r, g, b);
     }
 
     public static BufferedImage recolorBufferedImageRandomly(final BufferedImage bImage) {
@@ -73,34 +64,22 @@ public abstract class ImageUtil {
     }
 
     public static BufferedImage recolorBufferedImage(final BufferedImage bImage, final int r, final int g, final int b) {
-        for (int x = 0; x < bImage.getWidth(); x++) {
-            for (int y = 0; y < bImage.getHeight(); y++) {
-                final Color pixelColor = new Color(bImage.getRGB(x, y), true);
+        final ColorModel     cm                   = bImage.getColorModel();
+        final boolean        isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        final WritableRaster raster               = bImage.copyData(null);
+        final BufferedImage  copy                 = new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+
+        for (int x = 0; x < copy.getWidth(); x++) {
+            for (int y = 0; y < copy.getHeight(); y++) {
+                final Color pixelColor = new Color(copy.getRGB(x, y), true);
 
                 if ((pixelColor.getRGB() & 0x00FFFFFF) != 0 && (pixelColor.getRGB() >> 24) != 0x00) {
-                    bImage.setRGB(x, y, new Color(r, g, b, pixelColor.getAlpha()).getRGB());
+                    copy.setRGB(x, y, new Color(r, g, b, pixelColor.getAlpha()).getRGB());
                 }
             }
         }
-        return bImage;
-    }
 
-    private static IndexColorModel createCustomColorModel(final int rValue, final int gValue, final int bValue) {
-        int size = 256;
-
-        byte[] r = new byte[size];
-        byte[] g = new byte[size];
-        byte[] b = new byte[size];
-        byte[] a = new byte[size];
-
-        for (int i = 0; i < size; i++) {
-            r[i] = (byte) rValue;
-            g[i] = (byte) gValue;
-            b[i] = (byte) bValue;
-            a[i] = (byte) i;
-        }
-
-        return new IndexColorModel(16, size, r, g, b, a);
+        return copy;
     }
 
     private static int getRandomRGBInteger() {

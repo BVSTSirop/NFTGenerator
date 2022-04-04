@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.*;
 
 public class Main {
+    private static final int    STARTING_INDEX     = 0;
     private static final int    AMOUNT_TO_GENERATE = 150;
     private static final String RECOLORABLE_INDICATOR = "c_";
 
@@ -44,7 +45,7 @@ public class Main {
 
 
     private static List<Color> materialColors;
-    private static int         avatarId = 0;
+    private static int         currentAvatarId = 0;
 
     public static void main(String... args) throws IOException {
         final Map<String, List<Trait>> bodyParts = readTraits(BODY_PARTS_DIR);
@@ -81,9 +82,9 @@ public class Main {
             }
         }
 
-        avatarId++;
+        currentAvatarId++;
 
-        return new Avatar(avatarId, AVATAR_NAME, AVATAR_DESC, materialColors.get(RANDOM.nextInt(materialColors.size())), attributes);
+        return new Avatar(currentAvatarId, AVATAR_NAME, AVATAR_DESC, materialColors.get(RANDOM.nextInt(materialColors.size())), attributes);
     }
 
     private static List<Color> readColorsFile(final File f) {
