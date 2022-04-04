@@ -56,7 +56,7 @@ public class Main {
         Avatar avatar;
         for(int i = 0; i < AMOUNT_TO_GENERATE; i++) {
             avatar = createAvatar(bodyParts, traits);
-            ImageUtil.drawAvatar(avatar, new File(IMG_OUTPUT_DIR, avatar.getId() + IMG_FILE_EXT));
+            ImageUtil.drawAvatar(avatar, new File(IMG_OUTPUT_DIR, avatar.getId() + IMG_FILE_EXT), materialColors);
             FileUtil.writeToFile(new File(JSON_OUTPUT_DIR, avatar.getId() + JSON_FILE_EXT), avatar.getAvatarPropertiesAsJSON());
         }
     }

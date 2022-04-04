@@ -16,10 +16,13 @@ import java.util.Random;
 public abstract class ImageUtil {
     private static final Random RANDOM = new Random();
 
-    private ImageUtil() {
+    private ImageUtil() { }
+
+    public static Color getRandomColorFromList(final List<Color> colors) {
+        return colors.get(RANDOM.nextInt(colors.size()));
     }
 
-    public static void drawAvatar(final Avatar avatar, final File f) throws IOException {
+    public static void drawAvatar(final Avatar avatar, final File f, final List<Color> colors) throws IOException {
         final List<Trait>   attributes = avatar.getAttributes();
         final BufferedImage firstTrait = attributes.stream().findFirst().get().getImage();
         final BufferedImage combined   = new BufferedImage(firstTrait.getWidth(), firstTrait.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -28,7 +31,7 @@ public abstract class ImageUtil {
         graphics.setColor(avatar.getBackgroundColor());
         graphics.fillRect(0, 0, firstTrait.getWidth(), firstTrait.getHeight());
 
-        drawTraits(attributes, graphics);
+        drawTraits(attributes, graphics, colors);
 
         graphics.dispose();
 
@@ -40,13 +43,13 @@ public abstract class ImageUtil {
         ImageIO.write(combined, "PNG", f);
     }
 
-    public static void drawTraits(List<Trait> traits, Graphics g) {
+    public static void drawTraits(List<Trait> traits, Graphics g, final List<Color> colors) {
         BufferedImage recoloredCharacteristic;
         for (Trait characteristic : traits) {
             final BufferedImage original = characteristic.getImage();
 
             if (characteristic.isRecolorable()) {
-                recoloredCharacteristic = recolorBufferedImageRandomly(original);
+                recoloredCharacteristic = recolorBufferedImage(original, getRandomColorFromList(colors));
 
                 g.drawImage(recoloredCharacteristic, 0, 0, null);
             } else {
@@ -55,15 +58,19 @@ public abstract class ImageUtil {
         }
     }
 
-    public static BufferedImage recolorBufferedImageRandomly(final BufferedImage bImage) {
+    public static Color getRandomColor() {
         final int r = getRandomRGBInteger();
         final int g = getRandomRGBInteger();
         final int b = getRandomRGBInteger();
 
-        return recolorBufferedImage(bImage, r, g, b);
+        return new Color(r,g,b);
     }
 
-    public static BufferedImage recolorBufferedImage(final BufferedImage bImage, final int r, final int g, final int b) {
+    public static BufferedImage recolorBufferedImageRandomly(final BufferedImage bImage) {
+        return recolorBufferedImage(bImage, getRandomColor());
+    }
+
+    public static BufferedImage recolorBufferedImage(final BufferedImage bImage, final Color color) {
         final ColorModel     cm                   = bImage.getColorModel();
         final boolean        isAlphaPremultiplied = cm.isAlphaPremultiplied();
         final WritableRaster raster               = bImage.copyData(null);
@@ -74,7 +81,7 @@ public abstract class ImageUtil {
                 final Color pixelColor = new Color(copy.getRGB(x, y), true);
 
                 if ((pixelColor.getRGB() & 0x00FFFFFF) != 0 && (pixelColor.getRGB() >> 24) != 0x00) {
-                    copy.setRGB(x, y, new Color(r, g, b, pixelColor.getAlpha()).getRGB());
+                    copy.setRGB(x, y, new Color(color.getRed(), color.getGreen(), color.getBlue(), pixelColor.getAlpha()).getRGB());
                 }
             }
         }
