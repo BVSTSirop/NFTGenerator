@@ -23,13 +23,13 @@ import java.util.*;
 
 public class Main {
     private static final int    STARTING_INDEX     = 0;
-    private static final int    AMOUNT_TO_GENERATE = 150;
+    private static final int    AMOUNT_TO_GENERATE = 200;
     private static final String RECOLORABLE_INDICATOR = "c_";
 
     private static final File RES_DIR         = Paths.get("src", "main", "resources").toFile();
-    private static final File OUTPUT_DIR      = new File(RES_DIR, "output");
-    private static final File IMG_OUTPUT_DIR  = new File(OUTPUT_DIR, "images");
-    private static final File JSON_OUTPUT_DIR = new File(OUTPUT_DIR, "json");
+    private static final File SRC_DIR         = Paths.get("src").toFile();
+    private static final File IMG_OUTPUT_DIR  = new File(SRC_DIR, "images");
+    private static final File JSON_OUTPUT_DIR = new File(SRC_DIR, "json");
     private static final File IMAGES_DIR      = new File(RES_DIR, "images");
     private static final File BODY_PARTS_DIR  = new File(IMAGES_DIR, "body_parts");
     private static final File BODY_DIR        = new File(BODY_PARTS_DIR, "body");

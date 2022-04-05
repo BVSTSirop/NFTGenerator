@@ -1,14 +1,17 @@
 package ch.killenberger.traitgenerator.model;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import java.awt.image.BufferedImage;
 
 public class Trait {
     @Expose
+    @SerializedName(value = "trait_type")
     private String        type;
 
     @Expose
+    @SerializedName(value = "value")
     private String        name;
 
     private BufferedImage image;
