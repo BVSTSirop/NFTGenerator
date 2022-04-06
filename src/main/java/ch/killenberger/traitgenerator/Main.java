@@ -20,10 +20,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class Main {
     private static final int    AMOUNT_TO_GENERATE = 200;
-    private static final String RECOLORABLE_INDICATOR = "c_";
+    private static final String RECOLOR_INDICATOR  = "c_";
 
     private static final File RES_DIR         = Paths.get("src", "main", "resources").toFile();
     private static final File SRC_DIR         = Paths.get("src").toFile();
@@ -88,14 +89,10 @@ public class Main {
     private static List<Color> readColorsFile(final File f) {
         final JSONParser jsonParser = new JSONParser();
 
-        try (FileReader reader = new FileReader(f))
-        {
-            //Read JSON file
-            Object obj = jsonParser.parse(reader);
+        try (FileReader reader = new FileReader(f)) {
+            final Object obj = jsonParser.parse(reader);
 
-            JSONArray colorArray = (JSONArray) obj;
-
-            return convertToColorList(colorArray);
+            return convertToColorList((JSONArray) obj);
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
@@ -107,9 +104,8 @@ public class Main {
         final List<Color> colors = new ArrayList<>();
 
         for (Object jsonObject : colorArray) {
-            final JSONObject color = (JSONObject) jsonObject;
-
-            JSONArray rgbArray = (JSONArray) color.get("rgb");
+            final JSONObject color    = (JSONObject) jsonObject;
+            final JSONArray  rgbArray = (JSONArray) color.get("rgb");
 
             final float r = ((Long) rgbArray.get(0)).floatValue() / 255;
             final float g = ((Long) rgbArray.get(1)).floatValue() / 255;
@@ -124,42 +120,57 @@ public class Main {
     private static TreeMap<String, List<Trait>> readTraits(final File directory) throws IOException {
         final TreeMap<String, List<Trait>> traits = new TreeMap<>();
 
-        Files.walk(directory.toPath()).map(Path::toFile).skip(1).forEach(f -> {
-            if (f.isDirectory()) {
-                final String dirName = f.getName();
+        try (Stream<Path> directories = Files.walk(directory.toPath())) {
+                directories.map(Path::toFile).skip(1).forEach(f -> {
+                    if (f.isDirectory()) {
+                        final String dirName = f.getName();
 
-                if (!traits.containsKey(dirName)) {
-                    traits.put(dirName, new ArrayList<>());
-                }
-            } else {
-                final String parentDir = f.getParentFile().getName();
-
-
-                final String        name;
-                final BufferedImage image;
-                final boolean       recolorable;
-
-                final String filename = f.getName();
-                if(filename.startsWith(RECOLORABLE_INDICATOR)) {
-                    recolorable = true;
-                    name        = FileUtil.removeFileExtension(filename).substring(RECOLORABLE_INDICATOR.length());
-                } else {
-                    recolorable = false;
-                    name        = FileUtil.removeFileExtension(filename);
-                }
-
-                try {
-                    image = ImageIO.read(f);
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                    return;
-                }
-
-                traits.get(parentDir).add(new Trait(parentDir, name, image, recolorable));
-            }
-        });
+                        if (!traits.containsKey(dirName)) {
+                            traits.put(dirName, new ArrayList<>());
+                        }
+                    } else {
+                        final String type = f.getParentFile().getName();
+                        try {
+                            final Trait  trait = createTraitFromFile(f, type);
+                            traits.get(type).add(trait);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+        } catch(IOException e) {
+            System.out.println("Exception while processing traits! " + e);
+            throw e;
+        }
 
         return traits;
+    }
+
+    private static Trait createTraitFromFile(final File f, final String type) throws IOException {
+        if(f.isDirectory()) {
+            throw new IllegalArgumentException(f.getAbsolutePath() + " is a directory!");
+        }
+
+        final String  name;
+        final boolean recolorable;
+        final String  filename = f.getName();
+
+        if(filename.startsWith(RECOLOR_INDICATOR)) {
+            recolorable = true;
+            name        = FileUtil.removeFileExtension(filename).substring(RECOLOR_INDICATOR.length());
+        } else {
+            recolorable = false;
+            name        = FileUtil.removeFileExtension(filename);
+        }
+
+        final BufferedImage image;
+        try {
+            image = ImageIO.read(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        return new Trait(type, name, image, recolorable);
     }
 }
