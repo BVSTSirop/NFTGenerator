@@ -4,6 +4,7 @@ import ch.killenberger.traitgenerator.model.Avatar;
 import ch.killenberger.traitgenerator.model.Trait;
 import ch.killenberger.traitgenerator.util.FileUtil;
 import ch.killenberger.traitgenerator.util.ImageUtil;
+import ch.killenberger.traitgenerator.util.RandomCollection;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -49,8 +50,8 @@ public class Main {
     private static int         currentAvatarId = 0;
 
     public static void main(String... args) throws IOException {
-        final Map<String, List<Trait>> bodyParts = readTraits(BODY_PARTS_DIR);
-        final Map<String, List<Trait>> traits    = readTraits(TRAITS_DIR);
+        final Map<String, RandomCollection<Trait>> bodyParts = readTraits(BODY_PARTS_DIR, false);
+        final Map<String, RandomCollection<Trait>> traits    = readTraits(TRAITS_DIR, true);
 
         materialColors = readColorsFile(COLORS_FILE);
 
@@ -62,23 +63,23 @@ public class Main {
         }
     }
 
-    private static Avatar createAvatar(final Map<String, List<Trait>> bodyParts, final Map<String, List<Trait>> traits) {
+    private static Avatar createAvatar(final Map<String, RandomCollection<Trait>> bodyParts, final Map<String, RandomCollection<Trait>> traits) {
         final List<Trait> attributes = new ArrayList<>();
-        for(Map.Entry<String, List<Trait>> entry : bodyParts.entrySet()) {
-            final List<Trait> value = entry.getValue();
+        for(Map.Entry<String, RandomCollection<Trait>> entry : bodyParts.entrySet()) {
+            final RandomCollection<Trait> value = entry.getValue();
 
-            attributes.add(value.get(RANDOM.nextInt(value.size())));
+            attributes.add(value.next());
         }
 
-        for(Map.Entry<String, List<Trait>> entry : traits.entrySet()) {
-            final List<Trait> value = entry.getValue();
+        for(Map.Entry<String, RandomCollection<Trait>> entry : traits.entrySet()) {
+            final RandomCollection<Trait> value = entry.getValue();
 
             if(value.size() > 1 && RANDOM.nextBoolean()) {
-                attributes.add(value.get(RANDOM.nextInt(value.size())));
+                attributes.add(value.next());
             } else {
                 int selection = RANDOM.nextInt(value.size() + 1);
                 if(selection < value.size()) { // This provides the option that no trait will be added
-                    attributes.add(value.get(RANDOM.nextInt(value.size())));
+                    attributes.add(value.next());
                 }
             }
         }
@@ -119,8 +120,8 @@ public class Main {
         return colors;
     }
 
-    private static HashMap<String, List<Trait>> readTraits(final File directory) throws IOException {
-        final HashMap<String, List<Trait>> traits = new LinkedHashMap<>();
+    private static HashMap<String, RandomCollection<Trait>> readTraits(final File directory, boolean noTraitPossible) throws IOException {
+        final HashMap<String, RandomCollection<Trait>> traits = new LinkedHashMap<>();
 
         try (Stream<Path> directories = Files.walk(directory.toPath())) {
                 directories.map(Path::toFile).skip(1).forEach(f -> {
@@ -128,13 +129,19 @@ public class Main {
                         final String dirName = getDirectoryNameWithoutPriority(f.getName());
 
                         if (!traits.containsKey(dirName)) {
-                            traits.put(dirName, new ArrayList<>());
+                            traits.put(dirName, new RandomCollection<>());
+
+                            if(noTraitPossible) {
+                                traits.get(dirName).add(50, new Trait(dirName, "No Trait", null, false));
+                            }
                         }
                     } else {
-                        final String type = getDirectoryNameWithoutPriority(f.getParentFile().getName());
+                        final String type   = getDirectoryNameWithoutPriority(f.getParentFile().getName());
+                        final double rarity = getPriorityFromFileName(f.getName());
+
                         try {
                             final Trait  trait = createTraitFromFile(f, type);
-                            traits.get(type).add(trait);
+                            traits.get(type).add(rarity, trait);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -174,6 +181,25 @@ public class Main {
         }
 
         return new Trait(type, name, image, recolorable);
+    }
+
+    private static double getPriorityFromFileName(final String filename) {
+        final Pattern pattern = Pattern.compile("^(\\d{1,3})|(\\d{1,3})|(\\d{1,3}\\.)");
+        final Matcher matcher = pattern.matcher(filename);
+
+        final double rarity;
+        if(matcher.find()) {
+            final String group = matcher.group();
+            if(group.startsWith(RECOLOR_INDICATOR)) {
+                rarity = Float.parseFloat(group.substring(RECOLOR_INDICATOR.length()));
+            } else {
+                rarity = Float.parseFloat(group);
+            }
+
+            return rarity;
+        }
+
+        return 100;
     }
 
     private static String getDirectoryNameWithoutPriority(final String dirName) {

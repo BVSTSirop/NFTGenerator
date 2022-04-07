@@ -11,6 +11,7 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public abstract class ImageUtil {
@@ -24,7 +25,7 @@ public abstract class ImageUtil {
 
     public static void drawAvatar(final Avatar avatar, final File f, final List<Color> colors) throws IOException {
         final List<Trait>   attributes = avatar.getAttributes();
-        final BufferedImage firstTrait = attributes.stream().findFirst().get().getImage();
+        final BufferedImage firstTrait = attributes.stream().filter(e -> e.getImage()!=null).findFirst().get().getImage();
         final BufferedImage combined   = new BufferedImage(firstTrait.getWidth(), firstTrait.getHeight(), BufferedImage.TYPE_INT_ARGB);
         final Graphics      graphics   = combined.getGraphics();
 
@@ -48,12 +49,14 @@ public abstract class ImageUtil {
         for (Trait characteristic : traits) {
             final BufferedImage original = characteristic.getImage();
 
-            if (characteristic.isRecolorable()) {
-                recoloredCharacteristic = recolorBufferedImage(original, getRandomColorFromList(colors));
+            if(characteristic != null) {
+                if (characteristic.isRecolorable()) {
+                    recoloredCharacteristic = recolorBufferedImage(original, getRandomColorFromList(colors));
 
-                g.drawImage(recoloredCharacteristic, 0, 0, null);
-            } else {
-                g.drawImage(original, 0, 0, null);
+                    g.drawImage(recoloredCharacteristic, 0, 0, null);
+                } else {
+                    g.drawImage(original, 0, 0, null);
+                }
             }
         }
     }
