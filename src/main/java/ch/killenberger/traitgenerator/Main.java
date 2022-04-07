@@ -20,6 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
@@ -117,19 +119,19 @@ public class Main {
         return colors;
     }
 
-    private static TreeMap<String, List<Trait>> readTraits(final File directory) throws IOException {
-        final TreeMap<String, List<Trait>> traits = new TreeMap<>();
+    private static HashMap<String, List<Trait>> readTraits(final File directory) throws IOException {
+        final HashMap<String, List<Trait>> traits = new LinkedHashMap<>();
 
         try (Stream<Path> directories = Files.walk(directory.toPath())) {
                 directories.map(Path::toFile).skip(1).forEach(f -> {
                     if (f.isDirectory()) {
-                        final String dirName = f.getName();
+                        final String dirName = getDirectoryNameWithoutPriority(f.getName());
 
                         if (!traits.containsKey(dirName)) {
                             traits.put(dirName, new ArrayList<>());
                         }
                     } else {
-                        final String type = f.getParentFile().getName();
+                        final String type = getDirectoryNameWithoutPriority(f.getParentFile().getName());
                         try {
                             final Trait  trait = createTraitFromFile(f, type);
                             traits.get(type).add(trait);
@@ -172,5 +174,15 @@ public class Main {
         }
 
         return new Trait(type, name, image, recolorable);
+    }
+
+    private static String getDirectoryNameWithoutPriority(final String dirName) {
+        final Pattern pattern = Pattern.compile("^(\\d\\.\\d_)|^(\\d_)");
+        final Matcher matcher = pattern.matcher(dirName);
+        if(matcher.find()) {
+            return dirName.substring(matcher.end());
+        }
+
+        return dirName;
     }
 }
