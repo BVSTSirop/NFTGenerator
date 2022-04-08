@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
-    private static final int    AMOUNT_TO_GENERATE = 200;
+    private static final int    AMOUNT_TO_GENERATE = 100;
     private static final String RECOLOR_INDICATOR  = "c_";
 
     private static final File RES_DIR         = Paths.get("src", "main", "resources").toFile();
@@ -74,11 +74,13 @@ public class Main {
         for(Map.Entry<String, RandomCollection<Trait>> entry : traits.entrySet()) {
             final RandomCollection<Trait> value = entry.getValue();
 
+            final Trait trait = value.next();
             if(value.size() > 1 && RANDOM.nextBoolean()) {
-                attributes.add(value.next());
+                if(trait.getImage() != null) {
+                    attributes.add(value.next());
+                }
             } else {
-                int selection = RANDOM.nextInt(value.size() + 1);
-                if(selection < value.size()) { // This provides the option that no trait will be added
+                if(trait.getImage() != null) {
                     attributes.add(value.next());
                 }
             }
