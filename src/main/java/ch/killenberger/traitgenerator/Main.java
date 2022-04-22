@@ -30,20 +30,15 @@ public class Main {
     private static final String RECOLOR_INDICATOR  = "c_";
 
     private static final File RES_DIR         = Paths.get("src", "main", "resources").toFile();
-    private static final File SRC_DIR         = Paths.get("src").toFile();
-    private static final File IMG_OUTPUT_DIR  = new File(SRC_DIR, "images");
-    private static final File JSON_OUTPUT_DIR = new File(SRC_DIR, "json");
     private static final File IMAGES_DIR      = new File(RES_DIR, "images");
     private static final File BODY_PARTS_DIR  = new File(IMAGES_DIR, "body_parts");
     private static final File TRAITS_DIR      = new File(IMAGES_DIR, "traits");
     private static final File COLORS_FILE     = new File(RES_DIR, "material_colors.json");
 
     private static final Random RANDOM        = new Random();
-    private static final String IMG_FILE_EXT  = ".png";
-    private static final String JSON_FILE_EXT = ".json";
 
-    private static final String AVATAR_NAME   = "Crested Gecko";
-    private static final String AVATAR_DESC   = "A procedurally generated crested gecko";
+    private static final String AVATAR_NAME   = "Friend";
+    private static final String AVATAR_DESC   = "Yay, a new friend!";
 
 
     private static List<Color> materialColors;
@@ -55,25 +50,29 @@ public class Main {
 
         materialColors = readColorsFile(COLORS_FILE);
 
-        Avatar avatar;
+        final List<Avatar> avatars = new ArrayList<>();
         for(int i = 0; i < AMOUNT_TO_GENERATE; i++) {
-            avatar = createAvatar(bodyParts, traits);
-            ImageUtil.drawAvatar(avatar, new File(IMG_OUTPUT_DIR, avatar.getId() + IMG_FILE_EXT), materialColors);
-            FileUtil.writeToFile(new File(JSON_OUTPUT_DIR, avatar.getId() + JSON_FILE_EXT), avatar.getAvatarPropertiesAsJSON());
+            avatars.add(createAvatar(bodyParts, traits));
         }
+
+        ImageUtil.drawAvatars(avatars, materialColors);
     }
 
     private static Avatar createAvatar(final Map<String, RandomCollection<Trait>> bodyParts, final Map<String, RandomCollection<Trait>> traits) {
         final List<Trait> attributes = new ArrayList<>();
+
+        // Bodyparts; Always mandatory
         for(Map.Entry<String, RandomCollection<Trait>> entry : bodyParts.entrySet()) {
             final RandomCollection<Trait> value = entry.getValue();
 
             attributes.add(value.next());
         }
 
+        // Traits; Optional
         for(Map.Entry<String, RandomCollection<Trait>> entry : traits.entrySet()) {
             final RandomCollection<Trait> value = entry.getValue();
 
+            // This is ensures not everytime a trait is chosen
             final Trait trait = value.next();
             if(value.size() > 1 && RANDOM.nextBoolean()) {
                 if(trait.getImage() != null) {
@@ -133,6 +132,7 @@ public class Main {
                         if (!traits.containsKey(dirName)) {
                             traits.put(dirName, new RandomCollection<>());
 
+                            // Adds a "no-trait" to the list of traits so no-trait is possible
                             if(noTraitPossible) {
                                 traits.get(dirName).add(50, new Trait(dirName, "No Trait", null, false));
                             }

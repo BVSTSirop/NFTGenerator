@@ -10,17 +10,35 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
 public abstract class ImageUtil {
-    private static final Random RANDOM = new Random();
+    private static final Random RANDOM          = new Random();
+    private static final File   SRC_DIR         = Paths.get("src").toFile();
+    private static final File   IMG_OUTPUT_DIR  = new File(SRC_DIR, "images");
+    private static final File   JSON_OUTPUT_DIR = new File(SRC_DIR, "json");
+    private static final String IMG_FILE_EXT    = ".png";
+    private static final String JSON_FILE_EXT   = ".json";
 
     private ImageUtil() { }
 
     public static Color getRandomColorFromList(final List<Color> colors) {
         return colors.get(RANDOM.nextInt(colors.size()));
+    }
+
+    public static void drawAvatars(final List<Avatar> avatars, final List<Color> colors) throws IOException {
+        File imgFile;
+        File jsonFile;
+        for(Avatar a : avatars) {
+            imgFile  = new File(IMG_OUTPUT_DIR, a.getId() + IMG_FILE_EXT);
+            jsonFile = new File(JSON_OUTPUT_DIR, a.getId() + JSON_FILE_EXT);
+
+            drawAvatar(a, imgFile, colors);
+            FileUtil.writeToFile(jsonFile, a.getAvatarPropertiesAsJSON());
+        }
     }
 
     public static void drawAvatar(final Avatar avatar, final File f, final List<Color> colors) throws IOException {
