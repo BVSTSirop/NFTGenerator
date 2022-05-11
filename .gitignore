@@ -5,4 +5,5 @@
 /gradle/
 /src/images/
 /src/json/
-/src/backup/*/images/
+/src/backup/*
+**.csv
