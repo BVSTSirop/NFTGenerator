@@ -55,4 +55,9 @@ public class Trait {
     public void setRecolorable(boolean recolorable) {
         this.recolorable = recolorable;
     }
+
+    @Override
+    public String toString() {
+        return "{\"trait_type\":\"" + type + "\",\"value\":\"" + name + "\"}";
+    }
 }

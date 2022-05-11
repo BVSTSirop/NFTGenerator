@@ -20,8 +20,9 @@ public abstract class ImageUtil {
     private static final File   SRC_DIR         = Paths.get("src").toFile();
     private static final File   IMG_OUTPUT_DIR  = new File(SRC_DIR, "images");
     private static final File   JSON_OUTPUT_DIR = new File(SRC_DIR, "json");
-    private static final String IMG_FILE_EXT    = ".png";
-    private static final String JSON_FILE_EXT   = ".json";
+
+    public static final String JSON_FILE_EXT   = ".json";
+    public static final String IMG_FILE_EXT    = ".png";
 
     private ImageUtil() { }
 

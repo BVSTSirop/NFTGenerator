@@ -5,6 +5,7 @@ import ch.killenberger.traitgenerator.model.Trait;
 import ch.killenberger.traitgenerator.util.FileUtil;
 import ch.killenberger.traitgenerator.util.ImageUtil;
 import ch.killenberger.traitgenerator.util.RandomCollection;
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -26,11 +27,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
-    private static final int    AMOUNT_TO_GENERATE = 100;
+    private static final int    AMOUNT_TO_GENERATE = 1000;
     private static final String RECOLOR_INDICATOR  = "c_";
 
     private static final File RES_DIR         = Paths.get("src", "main", "resources").toFile();
-    private static final File IMAGES_DIR      = new File(RES_DIR, "images");
+    public static final File IMAGES_DIR      = new File(RES_DIR, "images");
     private static final File BODY_PARTS_DIR  = new File(IMAGES_DIR, "body_parts");
     private static final File TRAITS_DIR      = new File(IMAGES_DIR, "traits");
     private static final File COLORS_FILE     = new File(RES_DIR, "material_colors.json");
@@ -56,6 +57,7 @@ public class Main {
         }
 
         ImageUtil.drawAvatars(avatars, materialColors);
+        FileUtil.createCSVFile(avatars);
     }
 
     private static Avatar createAvatar(final Map<String, RandomCollection<Trait>> bodyParts, final Map<String, RandomCollection<Trait>> traits) {
@@ -130,15 +132,15 @@ public class Main {
                         final String dirName = getDirectoryNameWithoutPriority(f.getName());
 
                         if (!traits.containsKey(dirName)) {
-                            traits.put(dirName, new RandomCollection<>());
+                            traits.put(StringUtils.capitalize(dirName), new RandomCollection<>());
 
                             // Adds a "no-trait" to the list of traits so no-trait is possible
                             if(noTraitPossible) {
-                                traits.get(dirName).add(50, new Trait(dirName, "No Trait", null, false));
+                                traits.get(StringUtils.capitalize(dirName)).add(50, new Trait(dirName, "No Trait", null, false));
                             }
                         }
                     } else {
-                        final String type   = getDirectoryNameWithoutPriority(f.getParentFile().getName());
+                        final String type   = StringUtils.capitalize(getDirectoryNameWithoutPriority(f.getParentFile().getName()));
                         final double rarity = getPriorityFromFileName(f.getName());
 
                         try {
@@ -168,11 +170,11 @@ public class Main {
 
         if(filename.startsWith(RECOLOR_INDICATOR)) {
             recolorable = true;
-            name        = FileUtil.removeFileExtension(filename).substring(RECOLOR_INDICATOR.length());
         } else {
             recolorable = false;
-            name        = FileUtil.removeFileExtension(filename);
         }
+
+        name = StringUtils.capitalize(FileUtil.removeFileExtension(filename).substring(filename.lastIndexOf("_") + 1));
 
         final BufferedImage image;
         try {

@@ -1,6 +1,8 @@
 package ch.killenberger.traitgenerator.model;
 
+import ch.killenberger.traitgenerator.Main;
 import ch.killenberger.traitgenerator.gson.ColorSerializer;
+import ch.killenberger.traitgenerator.util.ImageUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
@@ -20,6 +22,9 @@ public class Avatar {
     private String description;
 
     @Expose
+    private String image;
+
+    @Expose
     private Long date;
 
     @Expose
@@ -32,6 +37,7 @@ public class Avatar {
 
     public Avatar(final int id, final String name, final String description, final Color backgroundColor, final List<Trait> attributes) {
         this.id              = id;
+        this.image           = "https://killenberger.ch/NFT/images/" + this.id + ImageUtil.IMG_FILE_EXT;
         this.name            = name + " #" + id;
         this.description     = description;
         this.date            = new Timestamp(System.currentTimeMillis()).getTime();
@@ -92,6 +98,14 @@ public class Avatar {
 
     public void setAttributes(List<Trait> attributes) {
         this.attributes = attributes;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getAvatarPropertiesAsJSON() {
